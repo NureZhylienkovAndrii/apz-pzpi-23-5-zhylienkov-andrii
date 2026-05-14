@@ -1,0 +1,565 @@
+﻿МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+ 
+  
+КАФЕДРА ПРОГРАМНОЇ ІНЖЕНЕРІЇ
+ 
+
+
+ 
+Дисципліна «Архітектура програмного забезпечення»
+Звіт
+з лабораторної роботи №2
+
+
+ 
+ 
+   
+Виконав:
+ст. гр. ПЗПІ-23-5
+Жилєнков А. О.
+
+
+	 
+	Перевірив:
+ст. викладач кафедри ПІ
+Сокорчук І. П.
+ 
+	
+
+
+
+
+
+Харків – 2026
+1 ІСТОРІЯ ЗМІН
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	14.05.2026
+	0.1
+	Створено розділ «Завдання»
+	2
+	14.05.2026
+	0.1
+	Створено розділ «Опис Виконаної роботи»
+	3
+	14.05.2026
+	0.1
+	Створено розділ «Висновки»
+	4
+	14.05.2026
+	0.1
+	Створено розділ «Використані джерела»
+	5
+	14.05.2026
+	0.1
+	Створено розділ «Додаток А»
+	6
+	14.05.2026
+	0.1
+	Створено розділ «Додаток Б»
+	________________
+2 ЗАВДАННЯ
+Метою роботи є розробка мобільного програмного застосунку для будь-якої поширеної на сьогодні мобільної платформи. Мобільний застосунок повинен бути частиною системи і повинен взаємодіяти з нею. 
+________________
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+У межах виконання лабораторної роботи було розроблено мобільний застосунок для операційної системи Android [1], який інтегрується із серверною частиною програмної системи AutoRent, розробленої в попередньому семестрі, та забезпечує взаємодію користувача із функціоналом системи оренди автомобілів. Мобільний застосунок було реалізовано мовою програмування Kotlin [2] із використанням середовища розробки Android Studio. Серверна частина системи була побудована на платформі ASP.NET [3] Core із використанням технології Entity Framework Core [4] для взаємодії з базою даних SQLite [5]. Архітектура створеного рішення базується на клієнт-серверному підході, відповідно до якого мобільний застосунок виконує функції клієнта, а ASP.NET Core-застосунок виконує роль сервера, який обробляє HTTP-запити, взаємодіє з базою даних та повертає результати у форматі JSON.
+На початковому етапі виконання роботи було проведено аналіз структури існуючої програмної системи AutoRent, яка вже містила серверну частину, реалізовану за архітектурою ASP.NET Core MVC. У процесі аналізу було досліджено структуру моделей даних, конфігурацію Entity Framework Core, логіку роботи контролерів, а також способи взаємодії із базою даних. Після дослідження існуючої структури було прийнято рішення реалізувати окремий REST API-контролер для забезпечення обміну даними між мобільним застосунком та серверною частиною системи. Для цього у проєкті ASP.NET Core було створено файл MobileApiController.cs (див. додаток Б), який містить HTTP-методи для отримання інформації про автомобілі та створення бронювань. Контролер було реалізовано з використанням атрибутів ApiController та Route, що дозволило організувати REST API відповідно до сучасних стандартів розробки вебсервісів.
+У серверній частині було реалізовано метод GET для отримання списку автомобілів із бази даних. Під час виконання запиту сервер звертається до контексту бази даних AppDbContext та виконує отримання колекції автомобілів за допомогою Entity Framework Core. Отримані дані автоматично серіалізуються у формат JSON та передаються мобільному застосунку через HTTP-відповідь. Також було реалізовано метод GET для отримання інформації про окремий автомобіль за його ідентифікатором. Для забезпечення можливості створення бронювання було реалізовано HTTP POST-метод, який приймає дані у форматі JSON, формує новий об’єкт бронювання та зберігає його у базі даних. Для передачі інформації про бронювання було створено окремий клас RentalRequest, який містить поля ідентифікатора автомобіля, імені користувача та дат початку й завершення оренди.
+Для забезпечення взаємодії мобільного застосунку із сервером у конфігурацію ASP.NET Core було додано підтримку контролерів та механізм маршрутизації API. Окрім цього, було реалізовано підтримку CORS для усунення можливих проблем із мережевою взаємодією між Android-клієнтом та сервером. У файлі Program.cs було додано політику AllowAll, яка дозволяє виконання HTTP-запитів із мобільного застосунку. Також було змінено конфігурацію launchSettings.json для забезпечення запуску сервера через HTTP-протокол, оскільки Android Emulator за замовчуванням може блокувати роботу із локальними HTTPS-сертифікатами під час розробки та тестування.
+Після підготовки серверної частини було розпочато реалізацію мобільного застосунку. Для цього у середовищі Android Studio було створено новий Android-проєкт типу Empty Views Activity із використанням мови Kotlin. Під час створення застосунку було обрано класичний підхід до побудови інтерфейсу користувача за допомогою XML-розмітки та Android Views без використання Jetpack Compose, що дозволило спростити реалізацію та забезпечити стабільну роботу застосунку. Для реалізації мережевої взаємодії із REST API було використано бібліотеку Retrofit [6], яка забезпечує зручне виконання HTTP-запитів та автоматичне перетворення JSON-відповідей у Kotlin-об’єкти. Для підтримки серіалізації та десеріалізації JSON також було підключено бібліотеку Gson Converter.
+У структурі мобільного застосунку було створено декілька основних класів. Клас Car.kt було використано як модель даних автомобіля, що містить інформацію про ідентифікатор, марку, модель, рік випуску та вартість оренди за добу. Для опису HTTP-запитів до серверної частини було створено інтерфейс ApiService.kt, який містить метод отримання списку автомобілів через GET-запит до REST API. Для налаштування мережевої взаємодії було реалізовано клас RetrofitClient.kt, у якому створюється об’єкт Retrofit із базовою адресою сервера та конвертером Gson. Під час налаштування мережевої взаємодії було використано спеціальну адресу 10.0.2.2, яка забезпечує доступ Android Emulator до локального сервера, запущеного на комп’ютері розробника.
+Для відображення списку автомобілів у мобільному застосунку було використано компонент RecyclerView. У головному вікні застосунку MainActivity було створено RecyclerView та налаштовано LinearLayoutManager для вертикального відображення елементів списку. Для формування окремих елементів списку було реалізовано XML-макет item_car.xml, який містить текстові поля для відображення марки автомобіля, року випуску та вартості оренди. Для роботи із RecyclerView було створено клас CarAdapter.kt, який відповідає за створення елементів списку, прив’язку даних та обробку взаємодії користувача із елементами інтерфейсу. Під час запуску застосунку MainActivity виконує HTTP-запит до серверного API через Retrofit, отримує список автомобілів та передає його в адаптер RecyclerView для відображення на екрані (див. додаток А).
+Для реалізації взаємодії користувача із автомобілями було створено додатковий екран DetailActivity, який відкривається після натискання кнопки Details у списку автомобілів. Для передачі інформації між активностями було використано об’єкт Intent, через який передаються дані про вибраний автомобіль. На екрані деталей відображається повна інформація про автомобіль, включаючи марку, модель, рік випуску та вартість оренди. Також на цьому екрані було реалізовано кнопку Book Car, натискання на яку викликає повідомлення про успішне бронювання автомобіля. Таким чином було забезпечено базову взаємодію користувача із функціоналом мобільного застосунку та реалізовано імітацію процесу бронювання автомобіля.
+Під час виконання роботи також було створено UML-діаграми, які описують структуру та поведінку розробленої системи. Було побудовано UML-діаграму прецедентів, яка демонструє взаємодію користувача із функціями мобільного застосунку. UML-діаграма компонентів описує архітектуру системи та взаємодію між мобільним застосунком, REST API, серверною логікою та базою даних. Додатково було створено UML-діаграму пакетів, яка демонструє структуру Android-застосунку та взаємозв’язки між основними пакетами й класами, а також UML-діаграму діяльності, що описує послідовність дій користувача та системи під час перегляду та бронювання автомобілів.
+
+
+
+
+
+
+________________
+
+
+ВИСНОВКИ
+У результаті виконання лабораторної роботи було створено повноцінний мобільний застосунок для Android, який інтегрується із серверною частиною системи AutoRent та забезпечує взаємодію із даними через REST API. Реалізований застосунок дозволяє отримувати список автомобілів із бази даних, переглядати детальну інформацію про автомобілі та виконувати бронювання. Розроблене рішення демонструє практичне використання клієнт-серверної архітектури, REST API, технологій ASP.NET Core та Kotlin для створення мобільних програмних систем. 
+________________
+
+
+ВИКОРИСТАНІ ДЖЕРЕЛА
+1. Google. Android Developers — офіційна документація платформи Android [Електронний ресурс]. — Посилання: https://developer.android.com (дата звернення: 14.05.2026).
+2. JetBrains. Kotlin Documentation — офіційна документація мови Kotlin [Електронний ресурс]. — Посилання: https://kotlinlang.org/docs/home.html (дата звернення: 14.05.2026).
+3. Microsoft. ASP.NET Core Documentation — офіційна документація ASP.NET Core [Електронний ресурс]. — Посилання: https://learn.microsoft.com/aspnet/core (дата звернення: 14.05.2026).
+4. Microsoft. Entity Framework Core Documentation — документація ORM Entity Framework Core [Електронний ресурс]. — Посилання: https://learn.microsoft.com/ef/core (дата звернення: 14.05.2026).
+5. SQLite Consortium. SQLite Documentation — документація системи керування базами даних SQLite [Електронний ресурс]. — Посилання: https://www.sqlite.org/docs.html (дата звернення: 14.05.2026).
+6. Square, Inc. Retrofit — бібліотека для виконання HTTP-запитів в Android [Електронний ресурс]. — Посилання: https://square.github.io/retrofit/ (дата звернення: 14.05.2026).
+
+
+
+
+________________
+
+
+ДОДАТОК А
+Графічні матеріали
+
+
+  Рисунок А.1 — Головна сторінка застосунку
+
+
+  
+
+Рисунок А.2 — Загальні відомості
+  
+Рисунок А.3 — Діаграма прецендентів
+
+
+  
+Рисунок А.4 — Діаграма компонентів
+
+
+  
+Рисунок А.5 — Діаграма пакетів
+
+
+  
+Рисунок А.6 — Діаграма діяльності
+________________
+ДОДАТОК Б
+Програмний код
+Посилання на Github: https://github.com/NureZhylienkovAndrii/apz-pzpi-23-5-zhylienkov-andrii/tree/main/Pract2
+Б.1 MobileApiController.cs
+ 1  using Microsoft.AspNetCore.Mvc;
+ 2  using Microsoft.EntityFrameworkCore;
+ 3  using AutoRent.Data;
+ 4  using AutoRent.Models;
+ 5  
+ 6  namespace AutoRent.Controllers
+ 7  {
+ 8      [ApiController]
+ 9      [Route("api/[controller]")]
+10      public class MobileApiController : ControllerBase
+11      {
+12          private readonly AppDbContext _context;
+13  
+14          public MobileApiController(AppDbContext context)
+15          {
+16              _context = context;
+17          }
+18  
+19          [HttpGet("cars")]
+20          public async Task<IActionResult> GetCars()
+21          {
+22              var cars = await _context.Cars.ToListAsync();
+23  
+24              return Ok(cars);
+25          }
+26  
+27          [HttpGet("cars/{id}")]
+28          public async Task<IActionResult> GetCar(int id)
+29          {
+30              var car = await _context.Cars.FindAsync(id);
+31  
+32              if (car == null)
+33                  return NotFound();
+34  
+35              return Ok(car);
+36          }
+37  
+38          [HttpPost("rent")]
+39          public async Task<IActionResult> RentCar([FromBody] RentalRequest request)
+40          {
+41              var rental = new Booking
+42              {
+43                  CarId = request.CarId,
+44                  StartDate = request.StartDate,
+45                  EndDate = request.EndDate
+46              };
+47  
+48              _context.Bookings.Add(rental);
+49  
+50              await _context.SaveChangesAsync();
+51  
+52              return Ok(new
+53              {
+54                  message = "Rental created"
+55              });
+56          }
+57      }
+58  
+59      public class RentalRequest
+60      {
+61          public int CarId { get; set; }
+62  
+63          public DateTime StartDate { get; set; }
+64  
+65          public DateTime EndDate { get; set; }
+66      }
+67  }
+
+
+Б.2 ApiService.kt
+1  package com.example.autorentmobile
+2  
+3  import retrofit2.Call
+4  import retrofit2.http.GET
+5  
+6  interface ApiService {
+7  
+8      @GET("api/mobileapi/cars")
+9      fun getCars(): Call<List<Car>>
+10 }
+
+
+Б.3 Car.kt
+1  package com.example.autorentmobile
+2  
+3  data class Car(
+4      val id: Int,
+5      val brand: String,
+6      val model: String,
+7      val year: Int,
+8      val pricePerDay: Double
+9  )
+
+
+Б.4 CarAdapter.kt
+1  package com.example.autorentmobile
+2  
+3  import android.content.Intent
+4  import android.view.LayoutInflater
+5  import android.view.View
+6  import android.view.ViewGroup
+7  import android.widget.Button
+8  import android.widget.TextView
+9  import androidx.recyclerview.widget.RecyclerView
+10 
+11 class CarAdapter(
+12     private val cars: List<Car>
+13 ) : RecyclerView.Adapter<CarAdapter.CarViewHolder>() {
+14 
+15     class CarViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+16 
+17         val brand: TextView =
+18             view.findViewById(R.id.textBrand)
+19 
+20         val year: TextView =
+21             view.findViewById(R.id.textYear)
+22 
+23         val price: TextView =
+24             view.findViewById(R.id.textPrice)
+25 
+26         val button: Button =
+27             view.findViewById(R.id.buttonDetails)
+28     }
+29 
+30     override fun onCreateViewHolder(
+31         parent: ViewGroup,
+32         viewType: Int
+33     ): CarViewHolder {
+34 
+35         val view = LayoutInflater.from(parent.context)
+36             .inflate(R.layout.item_car, parent, false)
+37 
+38         return CarViewHolder(view)
+39     }
+40 
+41     override fun onBindViewHolder(
+42         holder: CarViewHolder,
+43         position: Int
+44     ) {
+45 
+46         val car = cars[position]
+47 
+48         holder.brand.text =
+49             "${car.brand} ${car.model}"
+50 
+51         holder.year.text =
+52             "Year: ${car.year}"
+53 
+54         holder.price.text =
+55             "Price per day: ${car.pricePerDay}$"
+56 
+57         holder.button.setOnClickListener {
+58 
+59             val intent = Intent(
+60                 holder.itemView.context,
+61                 DetailActivity::class.java
+62             )
+63 
+64             intent.putExtra("brand", car.brand)
+65             intent.putExtra("model", car.model)
+66             intent.putExtra("year", car.year)
+67             intent.putExtra("price", car.pricePerDay)
+68 
+69             holder.itemView.context.startActivity(intent)
+70         }
+71     }
+72 
+73     override fun getItemCount(): Int = cars.size
+74 }
+
+
+Б.5 DetailActivity.kt
+ 1  package com.example.autorentmobile
+ 2  
+ 3  import android.os.Bundle
+ 4  import android.widget.Button
+ 5  import android.widget.TextView
+ 6  import android.widget.Toast
+ 7  import androidx.appcompat.app.AppCompatActivity
+ 8  
+ 9  class DetailActivity : AppCompatActivity() {
+10  
+11      override fun onCreate(savedInstanceState: Bundle?) {
+12  
+13          super.onCreate(savedInstanceState)
+14  
+15          setContentView(R.layout.activity_detail)
+16  
+17          val title =
+18              findViewById<TextView>(R.id.textTitle)
+19  
+20          val year =
+21              findViewById<TextView>(R.id.textYear)
+22  
+23          val price =
+24              findViewById<TextView>(R.id.textPrice)
+25  
+26          val button =
+27              findViewById<Button>(R.id.buttonBook)
+28  
+29          val brand =
+30              intent.getStringExtra("brand")
+31  
+32          val model =
+33              intent.getStringExtra("model")
+34  
+35          val carYear =
+36              intent.getIntExtra("year", 0)
+37  
+38          val carPrice =
+39              intent.getDoubleExtra("price", 0.0)
+40  
+41          title.text = "$brand $model"
+42  
+43          year.text = "Year: $carYear"
+44  
+45          price.text = "Price per day: $carPrice$"
+46  
+47          button.setOnClickListener {
+48  
+49              Toast.makeText(
+50                  this,
+51                  "Car booked successfully!",
+52                  Toast.LENGTH_LONG
+53              ).show()
+54          }
+55      }
+56  }
+
+
+Б.6 MainActivity.kt
+1  package com.example.autorentmobile
+2  
+3  import android.os.Bundle
+4  import android.widget.Toast
+5  import androidx.appcompat.app.AppCompatActivity
+6  import androidx.recyclerview.widget.LinearLayoutManager
+7  import androidx.recyclerview.widget.RecyclerView
+8  import retrofit2.Call
+9  import retrofit2.Callback
+10 import retrofit2.Response
+11 
+12 class MainActivity : AppCompatActivity() {
+13 
+14     private lateinit var recyclerView: RecyclerView
+15 
+16     override fun onCreate(savedInstanceState: Bundle?) {
+17 
+18         super.onCreate(savedInstanceState)
+19 
+20         setContentView(R.layout.activity_main)
+21 
+22         recyclerView = findViewById(R.id.recyclerViewCars)
+23 
+24         recyclerView.layoutManager =
+25             LinearLayoutManager(this)
+26 
+27         loadCars()
+28     }
+29 
+30     private fun loadCars() {
+31 
+32         RetrofitClient.api.getCars()
+33             .enqueue(object : Callback<List<Car>> {
+34 
+35                 override fun onResponse(
+36                     call: Call<List<Car>>,
+37                     response: Response<List<Car>>
+38                 ) {
+39 
+40                     if (response.isSuccessful) {
+41 
+42                         val cars = response.body() ?: emptyList()
+43 
+44                         recyclerView.adapter =
+45                             CarAdapter(cars)
+46                     }
+47                 }
+48 
+49                 override fun onFailure(
+50                     call: Call<List<Car>>,
+51                     t: Throwable
+52                 ) {
+53 
+54                     t.printStackTrace()
+55 
+56                     Toast.makeText(
+57                         this@MainActivity,
+58                         t.message,
+59                         Toast.LENGTH_LONG
+60                     ).show()
+61                 }
+62             })
+63     }
+64 }
+
+
+Б.7 RetrofitClient.kt
+1  package com.example.autorentmobile
+2  
+3  import retrofit2.Retrofit
+4  import retrofit2.converter.gson.GsonConverterFactory
+5  
+6  object RetrofitClient {
+7  
+8      private const val BASE_URL = "http://10.0.2.2:5048/"
+9  
+10     val api: ApiService by lazy {
+11 
+12         Retrofit.Builder()
+13             .baseUrl(BASE_URL)
+14             .addConverterFactory(GsonConverterFactory.create())
+15             .build()
+16             .create(ApiService::class.java)
+17     }
+18 }
+
+
+Б.8 activity_detail.xml
+1  <?xml version="1.0" encoding="utf-8"?>
+2  
+3  <LinearLayout
+4      xmlns:android="http://schemas.android.com/apk/res/android"
+5      android:layout_width="match_parent"
+6      android:layout_height="match_parent"
+7      android:orientation="vertical"
+8      android:padding="24dp">
+9  
+10     <TextView
+11         android:id="@+id/textTitle"
+12         android:layout_width="wrap_content"
+13         android:layout_height="wrap_content"
+14         android:textSize="28sp"
+15         android:textStyle="bold"/>
+16 
+17     <TextView
+18         android:id="@+id/textYear"
+19         android:layout_width="wrap_content"
+20         android:layout_height="wrap_content"
+21         android:layout_marginTop="16dp"
+22         android:textSize="18sp"/>
+23 
+24     <TextView
+25         android:id="@+id/textPrice"
+26         android:layout_width="wrap_content"
+27         android:layout_height="wrap_content"
+28         android:layout_marginTop="16dp"
+29         android:textSize="18sp"/>
+30 
+31     <Button
+32         android:id="@+id/buttonBook"
+33         android:layout_width="wrap_content"
+34         android:layout_height="wrap_content"
+35         android:text="Book Car"
+36         android:layout_marginTop="24dp"/>
+37 
+38 </LinearLayout>
+
+
+Б.9 activity_main.xml
+1  <?xml version="1.0" encoding="utf-8"?>
+2  
+3  <LinearLayout
+4      xmlns:android="http://schemas.android.com/apk/res/android"
+5      android:layout_width="match_parent"
+6      android:layout_height="match_parent"
+7      android:orientation="vertical">
+8  
+9      <TextView
+10         android:layout_width="match_parent"
+11         android:layout_height="wrap_content"
+12         android:text="AutoRent Mobile"
+13         android:textSize="24sp"
+14         android:padding="16dp"/>
+15 
+16     <androidx.recyclerview.widget.RecyclerView
+17         android:id="@+id/recyclerViewCars"
+18         android:layout_width="match_parent"
+19         android:layout_height="match_parent"/>
+20 
+21 </LinearLayout>
+
+
+Б.10 item_car.xml
+1  <?xml version="1.0" encoding="utf-8"?>
+2  
+3  <androidx.cardview.widget.CardView
+4      xmlns:android="http://schemas.android.com/apk/res/android"
+5      xmlns:card_view="http://schemas.android.com/apk/res-auto"
+6      android:layout_width="match_parent"
+7      android:layout_height="wrap_content"
+8      android:layout_margin="8dp"
+9      card_view:cardCornerRadius="8dp">
+10 
+11     <LinearLayout
+12         android:layout_width="match_parent"
+13         android:layout_height="wrap_content"
+14         android:orientation="vertical"
+15         android:padding="16dp">
+16 
+17         <TextView
+18             android:id="@+id/textBrand"
+19             android:layout_width="wrap_content"
+20             android:layout_height="wrap_content"
+21             android:textSize="20sp"
+22             android:textStyle="bold"/>
+23 
+24         <TextView
+25             android:id="@+id/textYear"
+26             android:layout_width="wrap_content"
+27             android:layout_height="wrap_content"
+28             android:layout_marginTop="4dp"/>
+29 
+30         <TextView
+31             android:id="@+id/textPrice"
+32             android:layout_width="wrap_content"
+33             android:layout_height="wrap_content"
+34             android:layout_marginTop="4dp"/>
+35 
+36         <Button
+37             android:id="@+id/buttonDetails"
+38             android:layout_width="wrap_content"
+39             android:layout_height="wrap_content"
+40             android:text="Details"
+41             android:layout_marginTop="8dp"/>
+42 
+43     </LinearLayout>
+44 
+45 </androidx.cardview.widget.CardView>
