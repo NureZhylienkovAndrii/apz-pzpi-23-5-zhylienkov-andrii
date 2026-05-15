@@ -1,0 +1,505 @@
+﻿МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+ 
+  
+КАФЕДРА ПРОГРАМНОЇ ІНЖЕНЕРІЇ
+ 
+
+
+ 
+Дисципліна «Архітектура програмного забезпечення»
+Звіт
+з лабораторної роботи №3
+
+
+ 
+ 
+   
+Виконав:
+ст. гр. ПЗПІ-23-5
+Жилєнков А. О.
+
+
+	 
+	Перевірив:
+ст. викладач кафедри ПІ
+Сокорчук І. П.
+ 
+	
+
+
+
+
+
+Харків – 2026
+1 ІСТОРІЯ ЗМІН
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	15.05.2026
+	0.1
+	Створено розділ «Завдання»
+	2
+	15.05.2026
+	0.1
+	Створено розділ «Опис Виконаної роботи»
+	3
+	15.05.2026
+	0.1
+	Створено розділ «Висновки»
+	4
+	15.05.2026
+	0.1
+	Створено розділ «Використані джерела»
+	5
+	15.05.2026
+	0.1
+	Створено розділ «Додаток А»
+	6
+	15.05.2026
+	0.1
+	Створено розділ «Додаток Б»
+	________________
+2 ЗАВДАННЯ
+Метою роботи є розробка front-end частини програмної системи. Ця частина системи повинна підтримувати роботу клієнтів у веб-режимі та забезпечувати адміністрування системи, тобто мати окремий інтерфейс для звичайних користувачів і окремий — для адміністраторів (відповідно до ролей користувачів системи). Користувацький інтерфейс та інтерфейс адміністрування повинні підтримувати інтернаціоналізацію та локалізацію, а саме, забезпечувати: підтримку української на англійської мов сайту, формат дати та часу відповідний регіону, порядок сортування текстових значень, різні напрями введення тексту тощо. Адміністрування системи повинно забезпечувати: управління користувачами системи, управління даними системи, створення резервних копій налаштувань та даних, експорт та імпорт даних та налаштувань.  
+________________
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+У процесі виконання лабораторної роботи було здійснено розробку та вдосконалення front-end частини програмної системи AutoRent, призначеної для організації процесу оренди автомобілів через web-інтерфейс. За основу було використано вже існуючу програмну систему, реалізовану із застосуванням технології ASP.NET Core Razor Pages [1] та системи керування базами даних Microsoft SQL Server [2]. Основною метою виконання роботи було забезпечення повноцінної підтримки роботи користувачів у web-режимі, реалізація окремого функціоналу для адміністраторів системи, а також впровадження механізмів локалізації інтерфейсу та резервного копіювання даних відповідно до вимог лабораторної роботи.
+Під час виконання роботи було проаналізовано структуру існуючого програмного рішення та визначено його архітектурні особливості. Система побудована на основі архітектурного підходу Razor Pages, у межах якого кожна web-сторінка має власну модель обробки даних у файлах типу .cshtml.cs. У структурі системи вже були реалізовані механізми автентифікації та авторизації користувачів, а також розподіл доступу між звичайними користувачами та адміністраторами. Адміністративний функціонал системи був організований у каталозі Pages/Admin, де розміщувалися сторінки керування автомобілями, бронюваннями та користувачами. У зв’язку з цим було прийнято інженерне рішення не створювати новий web-застосунок, а вдосконалити вже існуючу систему шляхом додавання функціоналу, передбаченого методичними вказівками.
+У межах реалізації локалізації інтерфейсу було модифіковано конфігурацію застосунку у файлі Program.cs. До проєкту було підключено простір імен Microsoft.AspNetCore.Localization [3], а також реалізовано підтримку двох мовних культур — української та англійської. Для цього було створено масив підтримуваних культур за допомогою класу CultureInfo, після чого у конвеєр обробки HTTP-запитів було додано middleware UseRequestLocalization. Дане рішення забезпечило можливість зміни поточної мови інтерфейсу залежно від параметра culture, що передається у web-запиті. Додатково до конфігурації сервісів було підключено механізм локалізації через метод AddLocalization, а в корені проєкту створено каталог Resources, який використовується ASP.NET Core для підтримки локалізованих ресурсів.
+Для реалізації перемикання мов інтерфейсу було модифіковано головний шаблон web-застосунку Pages/Shared/_Layout.cshtml. У navigation menu системи було додано елементи керування для вибору української та англійської мов (див. додаток Б). При натисканні на відповідне посилання у URL автоматично передавався параметр culture, що дозволяло змінювати поточну локаль системи без перезапуску застосунку. Додатково було змінено сторінки Pages/Index.cshtml та адміністративні сторінки системи. Для цього використовувався клас CultureInfo, за допомогою якого визначалася активна культура користувача. Залежно від обраної мови система динамічно відображала відповідні текстові елементи інтерфейсу українською або англійською мовою (рис. А.1-А.2, А.3-А.4). У результаті було забезпечено базову підтримку інтернаціоналізації web-застосунку відповідно до вимог лабораторної роботи.
+Окрему увагу було приділено реалізації механізму резервного копіювання даних системи. Оскільки програмна система використовує Microsoft SQL Server, було прийнято інженерне рішення реалізувати резервне копіювання у форматі JSON. Такий підхід дозволив уникнути необхідності роботи з системними правами SQL Server та забезпечив просту й наочну реалізацію функції резервного копіювання через web-інтерфейс. Реалізація backup-функціоналу була виконана у файлі Pages/Admin/Cars.cshtml.cs, який уже містив підключення до контексту бази даних через _context. До класу сторінки було додано метод OnGetBackup, який отримував дані з таблиць автомобілів, бронювань та користувачів за допомогою Entity Framework Core. Після цього дані серіалізувалися у JSON-формат за допомогою класу JsonSerializer [4]. Для забезпечення читабельності резервної копії було використано параметр WriteIndented = true. Отриманий JSON-файл перетворювався у масив байтів і передавався користувачу як файл backup.json через механізм FileResult.
+Для забезпечення доступу до резервного копіювання через графічний інтерфейс було модифіковано сторінку Pages/Admin/Cars.cshtml. На сторінку адміністратора було додано кнопку Backup Database (рис. А.5), яка викликала обробник OnGetBackup через механізм Razor Pages handler routing. У результаті адміністратор системи отримав можливість створювати резервні копії даних безпосередньо через web-інтерфейс застосунку. Після натискання кнопки система автоматично формувала файл резервної копії та ініціювала його завантаження у браузері користувача.
+Під час виконання лабораторної роботи також було проаналізовано взаємодію між компонентами системи. Web-клієнт взаємодіє із серверною частиною через HTTP-запити, які обробляються ASP.NET Core Razor Pages. Серверна частина застосунку відповідає за маршрутизацію, обробку бізнес-логіки, автентифікацію користувачів та формування HTML-відповідей. Для роботи з даними використовується Entity Framework Core, який виконує роль проміжного шару між програмним кодом та SQL Server. Адміністративні сторінки системи взаємодіють із контекстом бази даних через ORM-модель, що дозволяє виконувати операції створення, редагування, видалення та отримання інформації про автомобілі, користувачів і бронювання. Реалізований механізм локалізації взаємодіє з middleware ASP.NET Core та забезпечує зміну мовних параметрів інтерфейсу залежно від поточної культури користувача. Механізм резервного копіювання взаємодіє із контекстом бази даних та модулем серіалізації JSON для формування резервної копії даних системи.
+
+
+
+
+
+
+
+
+________________
+
+
+ВИСНОВКИ
+У результаті виконання лабораторної роботи було успішно розроблено та вдосконалено front-end частину програмної системи AutoRent для підтримки роботи користувачів у web-режимі. Під час виконання роботи було проведено аналіз структури існуючого програмного забезпечення, визначено особливості його архітектури та виконано інтеграцію додаткового функціоналу відповідно до вимог методичних вказівок. У процесі роботи було використано технології ASP.NET Core Razor Pages, Entity Framework Core та Microsoft SQL Server, що дозволило забезпечити стабільну взаємодію між web-інтерфейсом, серверною логікою та базою даних системи. У ході виконання було реалізовано підтримку локалізації інтерфейсу українською та англійською мовами. Для цього було використано механізм RequestLocalization, який дозволив змінювати мовну культуру системи залежно від параметрів web-запиту. У результаті користувач отримав можливість змінювати мову інтерфейсу без перезапуску застосунку, що підвищило зручність використання системи та забезпечило підтримку інтернаціоналізації web-застосунку. Було реалізовано механізм резервного копіювання даних системи. Для цього було створено функціонал формування резервної копії у форматі JSON через адміністративний інтерфейс системи. Реалізоване рішення дозволяє адміністратору отримувати резервну копію інформації про автомобілі, користувачів та бронювання безпосередньо через web-інтерфейс. Використання JSON-формату дозволило забезпечити простоту реалізації, зручність зберігання та можливість подальшого використання резервних копій у системі. Також було досліджено принципи побудови web-застосунків на основі ASP.NET Core Razor Pages, механізми організації взаємодії між компонентами системи, роботу ORM Entity Framework Core та особливості інтеграції локалізації у web-застосунках. Було виконано моделювання структури системи за допомогою UML-діаграм, що дозволило наочно відобразити архітектуру програмного забезпечення, взаємодію користувачів із системою, процеси бронювання автомобілів та життєвий цикл бронювання. Отримані результати підтвердили можливість ефективного розширення існуючого програмного забезпечення шляхом інтеграції додаткового функціоналу без необхідності повного перепроєктування системи. Розроблений web-застосунок повністю відповідає вимогам лабораторної роботи, забезпечує підтримку ролей користувачів, роботу адміністративної панелі, локалізацію інтерфейсу та механізм резервного копіювання даних, а також демонструє практичне застосування сучасних технологій web-розробки у процесі створення інформаційних систем.
+ 
+________________
+
+
+ВИКОРИСТАНІ ДЖЕРЕЛА
+1. Microsoft. Razor Pages in ASP.NET Core — документація технології Razor Pages [Електронний ресурс]. — Посилання: https://learn.microsoft.com/aspnet/core/razor-pages (дата звернення: 15.05.2026).
+2. Microsoft. SQL Server Documentation — офіційна документація Microsoft SQL Server [Електронний ресурс]. — Посилання: https://learn.microsoft.com/sql/sql-server (дата звернення: 15.05.2026).
+3. Microsoft. Localization in ASP.NET Core — документація локалізації в ASP.NET Core [Електронний ресурс]. — Посилання: https://learn.microsoft.com/aspnet/core/fundamentals/localization (дата звернення: 15.05.2026).
+4. Microsoft. JSON Serialization in .NET — документація серіалізації JSON у .NET [Електронний ресурс]. — Посилання: https://learn.microsoft.com/dotnet/standard/serialization/system-text-json-overview (дата звернення: 15.05.2026).
+
+
+
+
+
+
+
+
+________________
+
+
+ДОДАТОК А
+Графічні матеріали
+
+
+  Рисунок А.1 — Головна сторінка застосунку (локалізація “English”)
+
+
+  
+
+Рисунок А.2 — Головна сторінка застосунку (локалізація “Українська”)
+
+
+  
+
+Рисунок А.3 — Панель адміністратора (локалізація “English”)
+
+
+  
+
+Рисунок А.4 — Панель адміністратора (локалізація “Українська”)
+
+
+  
+
+Рисунок А.5 — Кнопка “Backup Database” на адмін панелі управління автомобілями
+  
+Рисунок А.6 — Діаграма прецедентів
+
+
+  
+Рисунок А.7 — Діаграма компонентів
+
+
+  
+Рисунок А.8 — Діаграма діяльності
+
+
+  
+Рисунок А.9 — Діаграма станів
+________________
+ДОДАТОК Б
+Програмний код
+Посилання на Github: https://github.com/NureZhylienkovAndrii/apz-pzpi-23-5-zhylienkov-andrii/tree/main/Lab3/pzpi-23-5-zhylienkov-andrii-lab3
+Б.1 Cars.cshtml
+ 1  @page
+ 2  @model AutoRent.Pages.Admin.CarsModel
+ 3  @{
+ 4      ViewData["Title"] = "Управління автомобілями";
+ 5  }
+ 6
+ 7  <h2>Управління автомобілями</h2>
+ 8
+ 9  <table class="table">
+10      <thead>
+11          <tr>
+12              <th>ID</th>
+13              <th>Марка</th>
+14              <th>Модель</th>
+15              <th>Рік</th>
+16              <th>Ціна/день</th>
+17              <th>Статус</th>
+18              <th>Дії</th>
+19          </tr>
+20      </thead>
+21      <tbody>
+22          @foreach (var c in Model.Cars)
+23          {
+24              <tr>
+25                  <td>@c.Id</td>
+26                  <td>@c.Brand</td>
+27                  <td>@c.Model</td>
+28                  <td>@c.Year</td>
+29                  <td>@c.PricePerDay.ToString("0.00")</td>
+30                  <td>@c.Status?.Name</td>
+31                  <td>
+32
+33                      <form method="post" asp-page-handler="ChangeStatus" style="display:inline-block; margin-right:6px;">
+34                          <input type="hidden" name="CarId" value="@c.Id" />
+35                          <select name="NewStatusId" class="form-select form-select-sm" style="display:inline-block; width:auto;">
+36                              <option value="1" selected="@(c.StatusId == 1)">Available</option>
+37                              <option value="2" selected="@(c.StatusId == 2)">Unavailable</option>
+38                          </select>
+39                          <button type="submit" class="btn btn-sm btn-secondary">Змінити</button>
+40                      </form>
+41
+42                      <form method="post" asp-page-handler="Delete" style="display:inline-block;">
+43                          <input type="hidden" name="DeleteId" value="@c.Id" />
+44                          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Видалити авто?');">Видалити</button>
+45                      </form>
+46                  </td>
+47              </tr>
+48          }
+49      </tbody>
+50  </table>
+51
+52  <a asp-action="Backup"
+53     class="btn btn-primary">
+54
+55      Backup Database
+56
+57  </a>
+
+
+Б.2 Cars.cshtml.cs
+ 1 using AutoRent.Data;
+ 2 using AutoRent.Models;
+ 3 using Microsoft.AspNetCore.Mvc;
+ 4 using Microsoft.AspNetCore.Mvc.RazorPages;
+ 5 using Microsoft.EntityFrameworkCore;
+ 6 using System.Text;
+ 7 using System.Text.Json;
+ 8 
+ 9 namespace AutoRent.Pages.Admin
+10 {
+11     public class CarsModel : PageModel
+12     {
+13         private readonly AppDbContext _db;
+14 
+15         public CarsModel(AppDbContext db)
+16         {
+17             _db = db;
+18         }
+19 
+20         public List<Car> Cars { get; set; }
+21 
+22         [BindProperty]
+23         public int DeleteId { get; set; }
+24 
+25         [BindProperty]
+26         public int CarId { get; set; }
+27 
+28         [BindProperty]
+29         public int NewStatusId { get; set; }
+30 
+31         public async Task OnGetAsync()
+32         {
+33             Cars = await _db.Cars.Include(c => c.Status).ToListAsync();
+34         }
+35 
+36         public async Task<IActionResult> OnPostDeleteAsync()
+37         {
+38             var car = await _db.Cars.FindAsync(DeleteId);
+39             if (car != null)
+40             {
+41                 _db.Cars.Remove(car);
+42                 await _db.SaveChangesAsync();
+43             }
+44             return RedirectToPage();
+45         }
+46 
+47         public async Task<IActionResult> OnPostChangeStatusAsync()
+48         {
+49             var car = await _db.Cars.FindAsync(CarId);
+50             if (car != null)
+51             {
+52                 car.StatusId = NewStatusId;
+53                 await _db.SaveChangesAsync();
+54             }
+55             return RedirectToPage();
+56         }
+57 
+58         public FileResult OnGetBackup()
+59         {
+60             var backup = new
+61             {
+62                 Cars = _db.Cars.ToList(),
+63                 Bookings = _db.Bookings.ToList(),
+64                 Users = _db.Users.ToList()
+65             };
+66 
+67             var json =
+68                 JsonSerializer.Serialize(
+69                     backup,
+70                     new JsonSerializerOptions
+71                     {
+72                         WriteIndented = true
+73                     });
+74 
+75             var bytes =
+76                 Encoding.UTF8.GetBytes(json);
+77 
+78             return File(
+79                 bytes,
+80                 "application/json",
+81                 "backup.json");
+82         }
+83     }
+84 }
+
+
+Б.3 Index.cshtml
+ 1  @page
+ 2  @model Admin.IndexModel
+ 3  @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+ 4  @using System.Globalization
+ 5
+ 6  @{
+ 7      var culture =
+ 8          CultureInfo.CurrentCulture.Name;
+ 9  }
+10
+11  @if (culture.StartsWith("uk"))
+12  {
+13      <h1>Панель адміністратора</h1>
+14  }
+15  else
+16  {
+17      <h1>Admin Panel</h1>
+18  }
+19
+20  <div style="display:flex; flex-direction:column; gap:10px; max-width:300px;">
+21      <a asp-page="/Admin/Cars">Автомобілі</a>
+22      <a asp-page="/Admin/Bookings">Бронювання</a>
+23      <a asp-page="/Admin/Users">Клієнти</a>
+24  </div>
+
+
+Б.4 Program.cs
+ 1 using AutoRent.Data;
+ 2 using Microsoft.EntityFrameworkCore;
+ 3 using System.Globalization;
+ 4 using Microsoft.AspNetCore.Localization;
+ 5 
+ 6 var builder = WebApplication.CreateBuilder(args);
+ 7 
+ 8 builder.Services.AddRazorPages();
+ 9 
+10 builder.Services.AddDbContext<AppDbContext>(options =>
+11     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+12 
+13 builder.Services.AddSession(options =>
+14 {
+15     options.IdleTimeout = TimeSpan.FromMinutes(30);
+16     options.Cookie.HttpOnly = true;
+17     options.Cookie.IsEssential = true;
+18 });
+19 
+20 builder.Services.AddAuthentication("CookieAuth")
+21     .AddCookie("CookieAuth", options =>
+22     {
+23         options.LoginPath = "/Auth/Login";
+24         options.AccessDeniedPath = "/AccessDenied";
+25     });
+26 
+27 builder.Services.AddAuthorization();
+28 
+29 builder.Services.AddControllers();
+30 
+31 builder.Services.AddCors(options =>
+32 {
+33     options.AddPolicy("AllowAll",
+34         policy =>
+35         {
+36             policy.AllowAnyOrigin()
+37                   .AllowAnyMethod()
+38                   .AllowAnyHeader();
+39         });
+40 });
+41 
+42 builder.Services.AddLocalization(options =>
+43 {
+44     options.ResourcesPath = "Resources";
+45 });
+46 
+47 var app = builder.Build();
+48 
+49 app.UseCors("AllowAll");
+50 
+51 if (!app.Environment.IsDevelopment())
+52 {
+53     app.UseExceptionHandler("/Error");
+54     app.UseHsts();
+55 }
+56 
+57 app.UseHttpsRedirection();
+58 app.UseStaticFiles();
+59 
+60 app.UseRouting();
+61 
+62 app.UseSession();
+63 
+64 app.UseAuthentication();
+65 app.UseAuthorization();
+66 
+67 app.MapRazorPages();
+68 
+69 app.MapControllers();
+70 
+71 var supportedCultures = new[]
+72 {
+73     new CultureInfo("en"),
+74     new CultureInfo("uk")
+75 };
+76 
+77 app.UseRequestLocalization(
+78     new RequestLocalizationOptions
+79     {
+80         DefaultRequestCulture =
+81             new RequestCulture("en"),
+82 
+83         SupportedCultures =
+84             supportedCultures,
+85 
+86         SupportedUICultures =
+87             supportedCultures
+88     });
+89 
+90 app.Run();
+
+
+Б.5 _Layout.cshtml
+ 1 <!DOCTYPE html>
+ 2 <html lang="en">
+ 3 <head>
+ 4     <meta charset="utf-8" />
+ 5     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ 6     <title>@ViewData["Title"] AutoRent</title>
+ 7     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+ 8     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+ 9     <link rel="stylesheet" href="~/AutoRent.styles.css" asp-append-version="true" />
+10 </head>
+11 <body>
+12     <header>
+13         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+14             <div style="margin-left:20px;">
+15 
+16                 <a href="?culture=en">
+17                     English
+18                 </a>
+19 
+20                 |
+21 
+22                 <a href="?culture=uk">
+23                     Українська
+24                 </a>
+25 
+26             </div>
+27             <div class="container">
+28                 <a class="navbar-brand" asp-area="" asp-page="/Cars/Index">AutoRent</a>
+29                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+30                         aria-expanded="false" aria-label="Toggle navigation">
+31                     <span class="navbar-toggler-icon"></span>
+32                 </button>
+33                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+34                     <ul class="navbar-nav flex-grow-1">
+35                         <li class="nav-item">
+36                             <a class="nav-link text-dark" asp-page="/Bookings/My">Bookings</a>
+37                         </li>
+38                         <li class="nav-item">
+39                             @if (User.IsInRole("Admin"))
+40                             {
+41                                 <a class="nav-link" asp-page="/Admin/Index">Admin Panel</a>
+42                             }
+43                         </li>
+44                         <li class="nav-item">
+45                             <a class="nav-link text-danger" href="/Auth/Logout">Logout</a>
+46                         </li>
+47                     </ul>
+48                 </div>
+49             </div>
+50         </nav>
+51     </header>
+52     <div class="container">
+53         <main role="main" class="pb-3">
+54             @RenderBody()
+55         </main>
+56     </div>
+57 
+58     <footer class="border-top footer text-muted">
+59         <div class="container">
+60             &copy; 2025 - AutoRent - <a asp-area="" asp-page="/Privacy">Privacy</a>
+61         </div>
+62     </footer>
+63 
+64     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+65     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+66     <script src="~/js/site.js" asp-append-version="true"></script>
+67 
+68     @await RenderSectionAsync("Scripts", required: false)
+69 </body>
+70 </html>
+
+
+Б.6 BackupModel.cs
+1  namespace AutoRent.Models
+2  {
+3      public class BackupModel
+4      {
+5          public object Cars { get; set; }
+6
+7          public object Bookings { get; set; }
+8
+9          public object Users { get; set; }
+10     }
+11 }
